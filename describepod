@@ -4,18 +4,20 @@ set -e
 set -o pipefail
 
 [[ -z "${KUBE_FZF_PATH}" ]] && source kube-fzf.sh || source $KUBE_FZF_PATH
+
 describepod() {
-  local namespace_query pod_query result namespace pod_name
+  local context namespace pod_query result namespace pod_name
 
   _kube_fzf_handler "describepod" "$@"
-  namespace_query=$(echo $args | awk -F '|' '{ print $1 }')
-  pod_query=$(echo $args | awk -F '|' '{ print $2 }')
+  context=$(echo $args | awk -F '|' '{ print $1 }')
+  namespace=$(echo $args | awk -F '|' '{ print $2 }')
+  [ -z $namespace ] && namespace=$context
+  pod_query=$(echo $args | awk -F '|' '{ print $3 }')
 
-  result=$(_kube_fzf_search_pod "$namespace_query" "$pod_query")
-  IFS=$'|' read -r namespace pod_name <<< "$result"
+  pod_name=$(_kube_fzf_search_pod "$context" "$namespace" "$pod_query")
 
-  _kube_fzf_echo "kubectl describe pod $pod_name --namespace='$namespace'"
-  kubectl describe pod $pod_name --namespace=$namespace
+  _kube_fzf_echo "kubectl describe pod $pod_name --context='$context' --namespace='$namespace'"
+  kubectl describe pod $pod_name --context=$context --namespace=$namespace
 }
 
 describepod "$@"
