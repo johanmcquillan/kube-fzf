@@ -14,8 +14,7 @@ findpod() {
   [ -z $namespace ] && namespace=$context
   pod_query=$(echo $args | awk -F '|' '{ print $3 }')
 
-  result=$(_kube_fzf_search_pod "$context" "$namespace" "$pod_query")
-  IFS=$'|' read -r namespace pod_name <<< "$result"
+  pod_name=$(_kube_fzf_search_pod "$context" "$namespace" "$pod_query")
 
   _kube_fzf_echo "kubectl get pod --context='$context' --namespace='$namespace' --output=wide $pod_name"
   kubectl get pod --context=$context --namespace=$namespace --output=wide $pod_name

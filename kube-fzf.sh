@@ -6,7 +6,7 @@ _kube_fzf_usage() {
   case $func in
     findpod)
       cat << EOF
-findpod [-a | -n <namespace-query>] [pod-query]
+findpod [-a | -C <context>] [pod-query]
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
@@ -15,7 +15,7 @@ EOF
       ;;
     tailpod)
       cat << EOF
-tailpod [-a | -n <namespace-query>] [pod-query]
+tailpod [-a | -C <context>] [pod-query]
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
@@ -24,7 +24,7 @@ EOF
       ;;
     execpod)
       cat << EOF
-execpod [-a | -n <namespace-query>] [pod-query] <command>
+execpod [-a | -C <context>] [pod-query] <command>
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
@@ -33,7 +33,7 @@ EOF
       ;;
     pfpod)
       cat << EOF
-pfpod [ -c | -o | -a | -n <namespace-query>] [pod-query] <source-port:destination-port | port>
+pfpod [ -c | -o | -a | -C <context>] [pod-query] <source-port:destination-port | port>
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
@@ -44,7 +44,7 @@ EOF
       ;;
     describepod)
       cat << EOF
-describepod [-a | -n <namespace-query>] [pod-query]
+describepod [-a | -C <context>] [pod-query]
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
@@ -146,11 +146,11 @@ _kube_fzf_search_pod() {
 
   pod_name=$(kubectl get pod --context=$context --namespace=$namespace --no-headers \
                  | fzf $(echo $pod_fzf_args) \
-                 | awk '{ print $2 }')
+                 | awk '{ print $1 }')
 
   [ -z "$pod_name" ] && return 1
 
-  echo "$namespace|$pod_name"
+  echo "$pod_name"
 }
 
 _kube_fzf_echo() {
