@@ -10,8 +10,6 @@ findpod [-a | -n <namespace-query>] [pod-query]
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
--n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
-                         If there is only one match then it is selected automatically.
 -C <context>          -  Use the given context name.
 EOF
       ;;
@@ -21,8 +19,6 @@ tailpod [-a | -n <namespace-query>] [pod-query]
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
--n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
-                         If there is only one match then it is selected automatically.
 -C <context>          -  Use the given context name.
 EOF
       ;;
@@ -32,8 +28,6 @@ execpod [-a | -n <namespace-query>] [pod-query] <command>
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
--n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
-                         If there is only one match then it is selected automatically.
 -C <context>          -  Use the given context name.
 EOF
       ;;
@@ -43,8 +37,6 @@ pfpod [ -c | -o | -a | -n <namespace-query>] [pod-query] <source-port:destinatio
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
--n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
-                         If there is only one match then it is selected automatically.
 -C <context>          -  Use the given context name.
 -o                    -  Open in Browser after port-forwarding
 -c                    -  Copy to Clipboard
@@ -56,8 +48,6 @@ describepod [-a | -n <namespace-query>] [pod-query]
 
 -a                    -  Search in all namespaces
 -h                    -  Show help
--n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
-                         If there is only one match then it is selected automatically.
 -C <context>          -  Use the given context name.
 EOF
       ;;
