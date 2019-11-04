@@ -12,6 +12,7 @@ findpod [-a | -n <namespace-query>] [pod-query]
 -h                    -  Show help
 -n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
                          If there is only one match then it is selected automatically.
+-C <context>          -  Use the given context name.
 EOF
       ;;
     tailpod)
@@ -22,6 +23,7 @@ tailpod [-a | -n <namespace-query>] [pod-query]
 -h                    -  Show help
 -n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
                          If there is only one match then it is selected automatically.
+-C <context>          -  Use the given context name.
 EOF
       ;;
     execpod)
@@ -32,6 +34,7 @@ execpod [-a | -n <namespace-query>] [pod-query] <command>
 -h                    -  Show help
 -n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
                          If there is only one match then it is selected automatically.
+-C <context>          -  Use the given context name.
 EOF
       ;;
     pfpod)
@@ -42,6 +45,7 @@ pfpod [ -c | -o | -a | -n <namespace-query>] [pod-query] <source-port:destinatio
 -h                    -  Show help
 -n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
                          If there is only one match then it is selected automatically.
+-C <context>          -  Use the given context name.
 -o                    -  Open in Browser after port-forwarding
 -c                    -  Copy to Clipboard
 EOF
@@ -54,6 +58,7 @@ describepod [-a | -n <namespace-query>] [pod-query]
 -h                    -  Show help
 -n <namespace-query>  -  Find namespaces matching <namespace-query> and do fzf.
                          If there is only one match then it is selected automatically.
+-C <context>          -  Use the given context name.
 EOF
       ;;
   esac
@@ -63,12 +68,13 @@ _kube_fzf_handler() {
   local opt namespace_query pod_query cmd
   local open=false
   local copy=false
+  local context="minikube"
   local OPTIND=1
   local func=$1
 
   shift $((OPTIND))
 
-  while getopts ":hn:aoc" opt; do
+  while getopts ":hn:aocC:" opt; do
     case $opt in
       h)
         _kube_fzf_usage "$func"
@@ -85,6 +91,9 @@ _kube_fzf_handler() {
         ;;
       c)
         copy=true
+        ;;
+      C)
+        context="$OPTARG"
         ;;
       \?)
         echo "Invalid Option: -$OPTARG."
@@ -127,7 +136,7 @@ _kube_fzf_handler() {
     pod_query=$1
   fi
 
-  args="$namespace_query|$pod_query|$cmd|$open|$copy"
+  args="$context|$namespace_query|$pod_query|$cmd|$open|$copy"
 }
 
 _kube_fzf_fzf_args() {
@@ -140,33 +149,33 @@ _kube_fzf_fzf_args() {
 
 _kube_fzf_search_pod() {
   local namespace pod_name
-  local namespace_query=$1
-  local pod_query=$2
+  local context=$1
+  local namespace_query=$2
+  local pod_query=$3
   local pod_fzf_args=$(_kube_fzf_fzf_args "$pod_query")
 
   if [ -z "$namespace_query" ]; then
-      context=$(kubectl config current-context)
       namespace=$(kubectl config get-contexts --no-headers $context \
-        | awk '{ print $5 }')
+        | awk '{ print $6 }')
 
       namespace=${namespace:=default}
-      pod_name=$(kubectl get pod --namespace=$namespace --no-headers \
+      pod_name=$(kubectl get pod --context=$context --namespace=$namespace --no-headers \
           | fzf $(echo $pod_fzf_args) \
-        | awk '{ print $1 }')
+        | awk '{ print $2 }')
   elif [ "$namespace_query" = "--all-namespaces" ]; then
-    read namespace pod_name <<< $(kubectl get pod --all-namespaces --no-headers \
+    read namespace pod_name <<< $(kubectl get pod --context=$context --all-namespaces --no-headers \
         | fzf $(echo $pod_fzf_args) \
-      | awk '{ print $1, $2 }')
+      | awk '{ print $2, $3 }')
   else
     local namespace_fzf_args=$(_kube_fzf_fzf_args "$namespace_query" "--select-1")
-    namespace=$(kubectl get namespaces --no-headers \
+    namespace=$(kubectl get namespaces --context=$context --no-headers \
         | fzf $(echo $namespace_fzf_args) \
-      | awk '{ print $1 }')
+      | awk '{ print $2 }')
 
     namespace=${namespace:=default}
-    pod_name=$(kubectl get pod --namespace=$namespace --no-headers \
+    pod_name=$(kubectl get pod --context=$context --namespace=$namespace --no-headers \
         | fzf $(echo $pod_fzf_args) \
-      | awk '{ print $1 }')
+      | awk '{ print $2 }')
   fi
 
   [ -z "$pod_name" ] && return 1
@@ -180,4 +189,3 @@ _kube_fzf_echo() {
   local message=$1
   echo -e "\n$bold_green $message $reset_color\n"
 }
-

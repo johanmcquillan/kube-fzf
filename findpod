@@ -6,17 +6,18 @@ set -o pipefail
 [[ -z "${KUBE_FZF_PATH}" ]] && source kube-fzf.sh || source $KUBE_FZF_PATH
 
 findpod() {
-  local namespace_query pod_query result namespace pod_name
+  local context namespace_query pod_query result namespace pod_name
 
   _kube_fzf_handler "findpod" "$@"
-  namespace_query=$(echo $args | awk -F '|' '{ print $1 }')
-  pod_query=$(echo $args | awk -F '|' '{ print $2 }')
+  context=$(echo $args | awk -F '|' '{ print $1 }')
+  namespace_query=$(echo $args | awk -F '|' '{ print $2 }')
+  pod_query=$(echo $args | awk -F '|' '{ print $3 }')
 
-  result=$(_kube_fzf_search_pod "$namespace_query" "$pod_query")
+  result=$(_kube_fzf_search_pod "$context" "$namespace_query" "$pod_query")
   IFS=$'|' read -r namespace pod_name <<< "$result"
 
-  _kube_fzf_echo "kubectl get pod --namespace='$namespace' --output=wide $pod_name"
-  kubectl get pod --namespace=$namespace --output=wide $pod_name
+  _kube_fzf_echo "kubectl get pod --context='$context' --namespace='$namespace' --output=wide $pod_name"
+  kubectl get pod --context=$context --namespace=$namespace --output=wide $pod_name
 }
 
 findpod "$@"
