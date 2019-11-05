@@ -142,7 +142,15 @@ _kube_fzf_search_pod() {
   local pod_query=$3
   local pod_fzf_args=$(_kube_fzf_fzf_args "$pod_query")
 
-  [ -z $namespace ] && [ $context -eq "minikube" ] namespace='default' || namespace=$context
+  if [[ -z $namespace ]]
+  then if [[ $context -eq "minikube" ]]
+      then
+          namespace='default'
+      else
+          namespace=$context
+      fi
+  fi
+
 
   pod_name=$(kubectl get pod --context=$context --namespace=$namespace --no-headers \
                  | fzf $(echo $pod_fzf_args) \

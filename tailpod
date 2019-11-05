@@ -11,7 +11,14 @@ tailpod() {
   _kube_fzf_handler "tailpod" "$@"
   context=$(echo $args | awk -F '|' '{ print $1 }')
   namespace=$(echo $args | awk -F '|' '{ print $2 }')
-  [ -z $namespace ] && namespace=$context
+  if [[ -z $namespace ]]
+  then if [[ $context -eq "minikube" ]]
+       then
+           namespace='default'
+       else
+           namespace=$context
+       fi
+  fi
   pod_query=$(echo $args | awk -F '|' '{ print $3 }')
 
   pod_name=$(_kube_fzf_search_pod "$context" "$namespace" "$pod_query")
